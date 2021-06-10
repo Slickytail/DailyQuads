@@ -1,22 +1,92 @@
 import {CARDS, DIM, daily} from './generate.mjs'
-// Check the day
-let timestamp = new Date();
-let day = Math.floor(timestamp.getTime() / (1000 * 60 * 60 * 24));
-// Generate the puzzle on page load
-const PUZZLE = daily(day);
 
+// Keeps track of selected cards and their animations
 const CARDS_SELECTED = new Set();
 function onCardClicked(cardNum, cardEl) {
     cardEl.classList.toggle("selected");
+
+    if (CARDS_SELECTED.delete(cardNum))
+        return;
+
+    // Adding a card
+    CARDS_SELECTED.add(cardNum);
+
+    if (CARDS_SELECTED.size == 4) {
+        // Need to call Array.from to freeze the collection of elements
+        const cardEls = Array.from(document.getElementsByClassName("card selected"));
+
+        const four = Array.from(CARDS_SELECTED);
+        // Immediately clear CARDS_SELECTED and remove .selected
+        CARDS_SELECTED.clear();
+        cardEls.forEach(e => {
+            e.classList.remove("selected");
+            // .animating prevents click events on them
+            e.classList.add("animating");
+        });
+        
+        // Three cases: 
+        // * new quad
+        //   -> green, "pop", add to found quads
+        // * quad already found
+        //   -> gray? blue?
+        // * not a quad
+        //   -> red, shake
+        // => all cases: deselect
+        
+        if ( four.reduce((a, b) => a^b) == 0 ) {
+            // Correct quad
+            if ( !progress.includes(quadKey(four)) ) {
+                // New quad
+                // Animate
+                cardEls.forEach(x => x.classList.add("correct"));
+                // Save the found quad
+                progress.push(quadKey(four));
+                saveProgress();
+                // When everything else is done executing, add the found quad to the sidebar
+                // Maybe add a delay here for the animation?
+                setTimeout(() => {
+                    createDomQuad(four, true);
+                }, 0);
+            }
+            else {
+                // Previously found quad
+                cardEls.forEach(x => x.classList.add("already-found"));
+                // Maybe highlight it on the side?
+            }
+
+        } else {
+            // Not a quad
+            cardEls.forEach(x => x.classList.add("incorrect"));
+        }
+
+        // Remove any styles that we added here once the animation we chose ends
+        cardEls[0].addEventListener("animationend", () => 
+            cardEls.forEach(x => x.classList.remove("animating", "incorrect", "correct", "already-found")),
+            { once: true })
+        
+    }
+    
 }
 
+// Stores found quads in localstorage
+var progress = [];
+function saveProgress() {
+    localStorage.setItem("progress_quads", JSON.stringify(progress));
+}
+
+// Helper function to split a binary card into an array of attributes
 function binToTup(card) {
     let res = [];
     for (let i = 0; i < Math.ceil(DIM/2); i++)
         res.push((card >> (2 * i)) & 3);
     return res;
 }
+// Computes a string key from a quad
+function quadKey(quad) {
+    return Array.from(quad).sort().join();
+}
 
+// Creates a card element and inserts it into the page
 function createDomCard(card) {
 
     const SHAPES = [
@@ -34,7 +104,9 @@ function createDomCard(card) {
 
     let cardEl = document.createElement("div");
     cardEl.classList.add("card");
-    cardEl.addEventListener("click", () => onCardClicked(card, cardEl));
+    cardEl.addEventListener("click",
+        () => onCardClicked(card, cardEl),
+        { passive: true });
 
     let cardElInner = document.createElement("div");
     cardElInner.classList.add("card-inner");
@@ -54,6 +126,12 @@ function createDomCard(card) {
     return cardEl;
 }
 
+// Adds a found or recalled quad to the sidebar
+function createDomQuad(quad, animate) {
+    
+}
+
+// Populates the page content
 function createListeners() {
     document.getElementById("date").textContent =
         timestamp.toLocaleDateString("default", {
@@ -69,8 +147,29 @@ function createListeners() {
     const card_container = document.getElementById("cards");
     PUZZLE.cards.forEach(c => card_container.appendChild(createDomCard(c)));
 
+    // Populate found-quads display
+    // Check progress in localstorage
+    if (!(localStorage.getItem("progress_day") >= day)) {
+        // No progress or progress is outdated
+        localStorage.setItem("progress_day", day);
+        saveProgress();
+    }
+    else {
+        // Load progress
+        progress = JSON.parse(localStorage.getItem("progress_quads")) || [];
+        // Populate the sidebar
+        // Don't animate these quads
+        progress.forEach(q => createDomQuad(q, false));
+    }
 }
 
+// Check the day
+const timestamp = new Date();
+const day = Math.floor(timestamp.getTime() / (1000 * 60 * 60 * 24));
+// Start generating puzzle even before DOM content is ready
+const PUZZLE = daily(day);
+
+// Once DOM is ready, populate the page
 if (document.readyState === "complete" ||
    (document.readyState !== "loading" && !document.documentElement.doScroll) )
     createListeners();

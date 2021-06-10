@@ -60,16 +60,20 @@ function nQuadsSmart(cards) {
     // it's O(s^2 + 2^d).
     // Whereas the other one is O(s^3),
     // but we often expect s to be around sqrt(2^d).
+    //
+    // Consider a method of doing this incrementally:
+    // choose(n+1, 2) - choose(n, 2) = (n+1)(n) / 2 - n(n-1)/2 = n/2 * (n + 1 - (n - 1)) = n
 
+    let tot = 0;
     let pts = new Array(MAX).fill(0);
     let ordered = Array.from(cards);
     for (let a = 0; a < ordered.length; a++) {
         for (let b = a + 1; b < ordered.length; b++) {
-            pts[ordered[a]^ordered[b]]++;
+            tot += pts[ordered[a]^ordered[b]]++;
         }
     }
 
-    return pts.map(t => t*(t-1)/2).reduce((a, b) => a + b) / 3;
+    return tot / 3;
     
 }*/
 

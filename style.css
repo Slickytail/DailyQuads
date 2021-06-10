@@ -1,3 +1,4 @@
+/* "UI" base styling */
 body {
     padding: 10px;
     margin: 0;
@@ -12,6 +13,7 @@ body {
     height: 100%;
     width: 100%;
     display: grid;
+    /* Page layout defined here */
     grid-template:
         "title     title   " 4em
         "subtitle  subtitle" 2em
@@ -20,7 +22,7 @@ body {
         /   1fr       auto;
 
 }
-
+/* ----------- Header Styles ------------ */
 .title {
     grid-area: title;
     color: #333;
@@ -33,7 +35,7 @@ body {
     margin: auto 0;
 }
 
-
+/* ----------- Card Layout Styles -------------- */
 #cards {
     grid-area: cards;
     display: flex;
@@ -42,13 +44,18 @@ body {
     align-content: space-around;
     justify-content: space-around;
 }
+/* Colors of card symbols */
+.color-0 { color: #c43b6f; }
+.color-1 { color: #694ddb; }
+.color-2 { color: #36993b; }
+.color-3 { color: #c78e23; }
 
 /* Use some @media rules to make the cards resize appropriately */
 .card {
     --gold-rad: 4px;
-
-    border-radius: 6px;
-    box-shadow: 0px 2px 4px 1px rgba(0, 0, 0, 0.25);
+    --hover-scale: 1.025;
+    --transition-time: 0.15s;
+    --border-time: 0.08s;
 
     margin-left: 15px;
     margin-right: 15px;
@@ -58,15 +65,13 @@ body {
     width: 18%;
     position: relative;
 
-    transition: box-shadow ease-out 0.15s, transform ease-out 0.15s;
+    border-radius: 6px;
+    box-shadow: 0px 2px 4px 1px rgba(0, 0, 0, 0.25);
+
     background: radial-gradient(ellipse farthest-corner at right top, #feed9b 0%, #fedc98 8%, #efcc93 30%, #d4c697 40%, transparent 80%),
         radial-gradient(ellipse farthest-corner at left bottom, #ffffd5 0%, #ffffac 8%, #e8d9b1 25%, #deb49f 62.5%, #beb49f 100%);
 }
-/* "Lifting Up" */
-.card:hover, .card.selected {
-    box-shadow: 0px 3px 6px 2px rgba(0, 0, 0, 0.2);
-    transform: scale(1.02);
-}
+
 /* Covers up the gold background */
 .card::before {
     border-radius: inherit;
@@ -79,11 +84,6 @@ body {
     opacity: 1; 
     z-index: 1;
     background: #eee;
-    transition: opacity ease-out 0.1s;
-}
-/* Fades when card is selected */
-.card.selected::before {
-    opacity: 0.2;
 }
 
 /* Covers the gold background all of the time -- container for icons */
@@ -112,12 +112,8 @@ body {
     font-size: 40px;
 }
 
-.color-0 { color: #c43b6f; }
-.color-1 { color: #694ddb; }
-.color-2 { color: #36993b; }
-.color-3 { color: #c78e23; }
 
-
+/* ----------- Sidebar Styles -------------- */
 .found, .buttons {
     min-width: 250px;    
 }
@@ -126,4 +122,174 @@ body {
 }
 .buttons {
     grid-area: buttons;
+}
+
+
+/* ----------- Animations -------------- */
+
+/* "Lifting Up" */
+.card {
+    transition: box-shadow ease-out var(--transition-time),
+                transform ease-out var(--transition-time),
+                filter ease-out var(--border-time);
+}
+.card:hover, .card.selected, .card.animating {
+    box-shadow: 0px 4px 6px 2px rgba(0, 0, 0, 0.17);
+    transform: scale(var(--hover-scale));
+}
+
+/* Border fades in when card is selected */
+.card::before {
+    transition: opacity ease-out var(--border-time);
+}
+.card.selected::before, .card.animating::before {
+    opacity: 0.2;
+}
+
+/* ........... Quad result animations ............ */
+
+/* A card can't be selected during one of these */
+.card.animating {
+    pointer-events: none;
+}
+
+/* Incorrect: shake animation */
+.card.incorrect {
+    animation-name: shake;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+    animation-direction: alternate;
+    animation-iteration-count: 2;
+
+    filter: hue-rotate(-50deg);
+}
+.card-inner {
+    transition: filter var(--border-time);
+}
+.card.incorrect .card-inner {
+    filter: hue-rotate(50deg);
+}
+.card.incorrect::before {
+    opacity: 0;
+}
+
+@keyframes shake {
+    from {
+        transform: scale(var(--hover-scale)) translateX(0);
+    }
+
+    30% {
+        transform: scale(var(--hover-scale)) translateX(1px);
+    }
+    66% {
+        transform: scale(var(--hover-scale)) translateX(-2px);
+    }
+    to {
+        transform: scale(var(--hover-scale)) translateX(3px);
+    }
+}
+
+
+/* Correct: "pop" animation */
+.card.correct {
+    animation-name: pop;
+    animation-duration: 0.55s;
+    animation-timing-function: ease-in-out;
+
+    filter: hue-rotate(65deg) saturate(150%);
+}
+.card.correct .card-inner {
+    filter: hue-rotate(-65deg) saturate(70%);
+}
+.card.correct::before {
+    opacity: 0;
+}
+
+@keyframes pop {
+    from {
+        transform: scale(var(--hover-scale));
+    }
+    to {
+        transform: scale(1.05) translateY(-4px);
+    }
+}
+
+
+/* Previously found: "gray out" animation */
+/* We use an animation instead of transition for this so that the inside part can oversaturate at inverse proportion */
+.card.already-found {
+    animation-name: gray;
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(.17,.67,.59,.93);
+    animation-direction: alternate;
+
+}
+.card.already-found .card-inner {
+    animation-name: gray-inverse;
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(.17,.67,.59,.93);
+    animation-direction: alternate;
+}
+
+@keyframes gray {
+    from {
+        filter: saturate(100%);
+    }
+
+    10% {
+        filter: saturate(93%);
+    }
+    20% {
+        filter: saturate(86%);
+    }
+    30% {
+        filter: saturate(79%);
+    }
+    40% {
+        filter: saturate(72%);
+    }
+    50% {
+        filter: saturate(65%);
+    }
+    60% {
+        filter: saturate(58%);
+    }
+    70% {
+        filter: saturate(51%);
+    }
+
+    to {
+        filter: saturate(44%);
+    }
+}
+
+
+
+@keyframes gray-inverse {
+    from {
+        filter: saturate(100%);
+    }
+
+    20% {
+        filter: saturate(116%);
+    }
+    30% {
+        filter: saturate(126%);
+    }
+    40% {
+        filter: saturate(139%);
+    }
+    50% {
+        filter: saturate(153%);
+    }
+    60% {
+        filter: saturate(180%);
+    }
+    70% {
+        filter: saturate(220%);
+    }
+
+    to {
+        filter: saturate(290%);
+    }
 }
