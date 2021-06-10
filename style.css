@@ -1,0 +1,129 @@
+body {
+    padding: 10px;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    background-color: #eee;
+    user-select: none;
+}
+
+.container {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template:
+        "title     title   " 4em
+        "subtitle  subtitle" 2em
+        "cards     quads   " 2fr
+        "cards     buttons " auto
+        /   1fr       auto;
+
+}
+
+.title {
+    grid-area: title;
+    color: #333;
+    margin: auto 0;
+}
+
+.subtitle {
+    grid-area: subtitle;
+    color: #666;
+    margin: auto 0;
+}
+
+
+#cards {
+    grid-area: cards;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: space-around;
+    justify-content: space-around;
+}
+
+/* Use some @media rules to make the cards resize appropriately */
+.card {
+    --gold-rad: 4px;
+
+    border-radius: 6px;
+    box-shadow: 0px 2px 4px 1px rgba(0, 0, 0, 0.25);
+
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 0;
+
+    height: 40%;
+    width: 18%;
+    position: relative;
+
+    transition: box-shadow ease-out 0.15s, transform ease-out 0.15s;
+    background: radial-gradient(ellipse farthest-corner at right top, #feed9b 0%, #fedc98 8%, #efcc93 30%, #d4c697 40%, transparent 80%),
+        radial-gradient(ellipse farthest-corner at left bottom, #ffffd5 0%, #ffffac 8%, #e8d9b1 25%, #deb49f 62.5%, #beb49f 100%);
+}
+/* "Lifting Up" */
+.card:hover, .card.selected {
+    box-shadow: 0px 3px 6px 2px rgba(0, 0, 0, 0.2);
+    transform: scale(1.02);
+}
+/* Covers up the gold background */
+.card::before {
+    border-radius: inherit;
+    content: "";
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%; 
+    height: 100%;  
+    opacity: 1; 
+    z-index: 1;
+    background: #eee;
+    transition: opacity ease-out 0.1s;
+}
+/* Fades when card is selected */
+.card.selected::before {
+    opacity: 0.2;
+}
+
+/* Covers the gold background all of the time -- container for icons */
+.card-inner {
+    z-index: 2;
+    border-radius: inherit;
+    background: #eee;
+
+    padding: 10px;
+
+    position: absolute;
+    top: var(--gold-rad);
+    left: var(--gold-rad);
+    bottom: var(--gold-rad);
+    right: var(--gold-rad);
+
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+}
+
+.card-inner i {
+    font-size: 40px;
+}
+
+.color-0 { color: #c43b6f; }
+.color-1 { color: #694ddb; }
+.color-2 { color: #36993b; }
+.color-3 { color: #c78e23; }
+
+
+.found, .buttons {
+    min-width: 250px;    
+}
+.found {
+    grid-area: quads;
+}
+.buttons {
+    grid-area: buttons;
+}
