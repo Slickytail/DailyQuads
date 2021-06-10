@@ -85,8 +85,11 @@ function binToTup(card) {
 function quadKey(quad) {
     return Array.from(quad).sort().join();
 }
+function deQuadKey(key) {
+    return key.split(",").map(t => parseInt(t));
+}
 
-// Creates a card element and inserts it into the page
+// Creates a card element and styles it
 function createDomCard(card) {
 
     const SHAPES = [
@@ -104,9 +107,6 @@ function createDomCard(card) {
 
     let cardEl = document.createElement("div");
     cardEl.classList.add("card");
-    cardEl.addEventListener("click",
-        () => onCardClicked(card, cardEl),
-        { passive: true });
 
     let cardElInner = document.createElement("div");
     cardElInner.classList.add("card-inner");
@@ -128,7 +128,15 @@ function createDomCard(card) {
 
 // Adds a found or recalled quad to the sidebar
 function createDomQuad(quad, animate) {
-    
+    let container = document.createElement("div");
+    container.classList.add("found-quad");
+    container.id = quadKey(quad);
+
+    quad.forEach(q => container.appendChild(createDomCard(q)));
+    document.getElementById("found").appendChild(container);
+
+    // Update the count
+    document.getElementById("nfound").textContent = progress.length;
 }
 
 // Populates the page content
@@ -142,10 +150,17 @@ function createListeners() {
         })
 
     document.getElementById("nquads").textContent = PUZZLE.n;
+    document.getElementById("nquads2").textContent = PUZZLE.n;
 
     // Populate the card display
     const card_container = document.getElementById("cards");
-    PUZZLE.cards.forEach(c => card_container.appendChild(createDomCard(c)));
+    PUZZLE.cards.forEach(c => {
+        let el = createDomCard(c);
+        el.addEventListener("click",
+            () => onCardClicked(c, el),
+            { passive: true });
+        card_container.appendChild(el)
+    });
 
     // Populate found-quads display
     // Check progress in localstorage
@@ -159,7 +174,7 @@ function createListeners() {
         progress = JSON.parse(localStorage.getItem("progress_quads")) || [];
         // Populate the sidebar
         // Don't animate these quads
-        progress.forEach(q => createDomQuad(q, false));
+        progress.forEach(q => createDomQuad(deQuadKey(q), false));
     }
 }
 

@@ -17,7 +17,7 @@ body {
     grid-template:
         "title     title   " 4em
         "subtitle  subtitle" 2em
-        "cards     quads   " 2fr
+        "cards     quads   " auto
         "cards     buttons " auto
         /   1fr       auto;
 
@@ -26,23 +26,26 @@ body {
 .title {
     grid-area: title;
     color: #333;
-    margin: auto 0;
+    margin: auto 20px;
 }
 
 .subtitle {
     grid-area: subtitle;
     color: #666;
-    margin: auto 0;
+    margin: auto 20px;
 }
 
 /* ----------- Card Layout Styles -------------- */
 #cards {
     grid-area: cards;
-    display: flex;
-    flex-wrap: wrap;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-row: repeat(2, 1fr);
+    padding: 10px;
+
+    justify-items: center;
     align-items: center;
-    align-content: space-around;
-    justify-content: space-around;
 }
 /* Colors of card symbols */
 .color-0 { color: #c43b6f; }
@@ -51,8 +54,8 @@ body {
 .color-3 { color: #c78e23; }
 
 /* Use some @media rules to make the cards resize appropriately */
-.card {
-    --gold-rad: 4px;
+#cards .card {
+    --gold-rad: 0.6vh;
     --hover-scale: 1.025;
     --transition-time: 0.15s;
     --border-time: 0.08s;
@@ -61,11 +64,11 @@ body {
     margin-right: 15px;
     padding: 0;
 
-    height: 40%;
-    width: 18%;
+    height: 32vh;
+    width: 21vh;
     position: relative;
 
-    border-radius: 6px;
+    border-radius: 7px;
     box-shadow: 0px 2px 4px 1px rgba(0, 0, 0, 0.25);
 
     background: radial-gradient(ellipse farthest-corner at right top, #feed9b 0%, #fedc98 8%, #efcc93 30%, #d4c697 40%, transparent 80%),
@@ -73,7 +76,7 @@ body {
 }
 
 /* Covers up the gold background */
-.card::before {
+#cards .card::before {
     border-radius: inherit;
     content: "";
     position: absolute;
@@ -109,18 +112,58 @@ body {
 }
 
 .card-inner i {
-    font-size: 40px;
+    font-size: 2.5em;
 }
 
 
 /* ----------- Sidebar Styles -------------- */
-.found, .buttons {
-    min-width: 250px;    
-}
-.found {
+#found {
     grid-area: quads;
+
+    display: flex;
+    flex-direction: column;
+    padding: 20px 20px 0 20px;
+    align-items: stretch;
+
+    border-left: 2px solid #ccc;
 }
-.buttons {
+.toptext {
+    color: #666;
+    margin: 8px;
+}
+.found-quad {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 5px;
+}
+
+#found .card {
+    --hover-scale: 1.035;
+    --gold-rad: 0;
+    --transition-time: 0.07s;
+    --border-time: 0s;
+
+    height: 11vh;
+    width: 7vh;
+    position: relative;
+    margin: 1px 2px;
+
+    border-radius: 4px;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+    font-size: 0.3em;
+}
+
+#found .found-quad:hover .card {
+    box-shadow: 0px 2px 3px 1px rgba(0, 0, 0, 0.1);
+    transform: scale(var(--hover-scale));
+}
+
+#found .card .card-inner {
+    padding: 5px;
+}
+
+
+#buttons {
     grid-area: buttons;
 }
 
@@ -133,17 +176,18 @@ body {
                 transform ease-out var(--transition-time),
                 filter ease-out var(--border-time);
 }
+
 .card:hover, .card.selected, .card.animating {
     box-shadow: 0px 4px 6px 2px rgba(0, 0, 0, 0.17);
     transform: scale(var(--hover-scale));
 }
 
 /* Border fades in when card is selected */
-.card::before {
+#cards .card::before {
     transition: opacity ease-out var(--border-time);
 }
 .card.selected::before, .card.animating::before {
-    opacity: 0.2;
+    opacity: 0.2 !important;
 }
 
 /* ........... Quad result animations ............ */
@@ -225,9 +269,9 @@ body {
 
 }
 .card.already-found .card-inner {
-    animation-name: gray-inverse;
-    animation-duration: 0.3s;
-    animation-timing-function: cubic-bezier(.17,.67,.59,.93);
+    /*animation-name: gray-inverse;*/
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in; /*cubic-bezier(.17,.67,.59,.93);*/
     animation-direction: alternate;
 }
 
@@ -235,7 +279,7 @@ body {
     from {
         filter: saturate(100%);
     }
-
+/*
     10% {
         filter: saturate(93%);
     }
@@ -260,6 +304,10 @@ body {
 
     to {
         filter: saturate(44%);
+    }
+    */
+    to {
+        filter: saturate(0%);
     }
 }
 
