@@ -133,7 +133,7 @@ function createDomQuad(quad, animate) {
     container.id = quadKey(quad);
 
     quad.forEach(q => container.appendChild(createDomCard(q)));
-    document.getElementById("found").appendChild(container);
+    document.getElementById("found-scroll").appendChild(container);
 
     // Update the count
     document.getElementById("nfound").textContent = progress.length;
@@ -161,6 +161,23 @@ function createListeners() {
             { passive: true });
         card_container.appendChild(el)
     });
+
+    // Compute a grid layout for the card container
+    function onResize() {
+
+        let totalWidth = window.innerWidth;
+        let totalHeight = window.innerHeight;
+
+        // The width of the "found" section is approximately 30vh
+
+        let cols = 4;
+        let rows = 2;
+
+        card_container.style.setProperty("--n-cols", cols);
+        card_container.style.setProperty("--n-rows", rows);
+    }
+    window.addEventListener("resize", onResize);
+    onResize();
 
     // Populate found-quads display
     // Check progress in localstorage

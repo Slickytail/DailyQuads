@@ -1,25 +1,26 @@
 /* "UI" base styling */
 body {
-    padding: 10px;
     margin: 0;
     width: 100vw;
     height: 100vh;
-    box-sizing: border-box;
     background-color: #eee;
     user-select: none;
 }
 
 .container {
-    height: 100%;
-    width: 100%;
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+    padding: 10px;
     display: grid;
     /* Page layout defined here */
     grid-template:
         "title     title   " 4em
         "subtitle  subtitle" 2em
-        "cards     quads   " auto
-        "cards     buttons " auto
-        /   1fr       auto;
+        "cards     quads   " minmax(0, 1fr)
+        "cards     buttons " 1em
+      /  1fr       auto;
 
 }
 /* ----------- Header Styles ------------ */
@@ -40,8 +41,8 @@ body {
     grid-area: cards;
 
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-row: repeat(2, 1fr);
+    grid-template-columns: repeat(var(--n-cols, 4), 1fr);
+    grid-template-rows: repeat(var(--n-rows, 2), 1fr);
     padding: 10px;
 
     justify-items: center;
@@ -53,20 +54,27 @@ body {
 .color-2 { color: #36993b; }
 .color-3 { color: #c78e23; }
 
-/* Use some @media rules to make the cards resize appropriately */
+.card {
+
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+
+    padding: 0;
+
+    height: 16.5em;
+    width: 11em;
+
+    position: relative;
+
+    font-size: var(--scale, 1em);
+}
+
 #cards .card {
     --gold-rad: 0.6vh;
     --hover-scale: 1.025;
     --transition-time: 0.15s;
     --border-time: 0.08s;
-
-    margin-left: 15px;
-    margin-right: 15px;
-    padding: 0;
-
-    height: 32vh;
-    width: 21vh;
-    position: relative;
+    --scale: 1em;
 
     border-radius: 7px;
     box-shadow: 0px 2px 4px 1px rgba(0, 0, 0, 0.25);
@@ -95,7 +103,7 @@ body {
     border-radius: inherit;
     background: #eee;
 
-    padding: 10px;
+    padding: 1em;
 
     position: absolute;
     top: var(--gold-rad);
@@ -119,13 +127,20 @@ body {
 /* ----------- Sidebar Styles -------------- */
 #found {
     grid-area: quads;
+    border-left: 2px solid #ccc;
 
+    padding: 10px 20px 0 20px;
     display: flex;
     flex-direction: column;
-    padding: 20px 20px 0 20px;
+}
+
+#found-scroll {
+    display: flex;
+    flex-direction: column;
     align-items: stretch;
 
-    border-left: 2px solid #ccc;
+    overflow-y: auto;
+
 }
 .toptext {
     color: #666;
@@ -142,42 +157,26 @@ body {
     --gold-rad: 0;
     --transition-time: 0.07s;
     --border-time: 0s;
-
-    height: 11vh;
-    width: 7vh;
-    position: relative;
-    margin: 1px 2px;
+    --scale: 0.35em;
 
     border-radius: 4px;
-    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
-    font-size: 0.3em;
+    border: 1px solid #ddd;
 }
-
-#found .found-quad:hover .card {
-    box-shadow: 0px 2px 3px 1px rgba(0, 0, 0, 0.1);
-    transform: scale(var(--hover-scale));
-}
-
-#found .card .card-inner {
-    padding: 5px;
-}
-
 
 #buttons {
     grid-area: buttons;
 }
 
-
 /* ----------- Animations -------------- */
 
 /* "Lifting Up" */
-.card {
+#cards .card {
     transition: box-shadow ease-out var(--transition-time),
                 transform ease-out var(--transition-time),
                 filter ease-out var(--border-time);
 }
 
-.card:hover, .card.selected, .card.animating {
+#cards .card:hover, .card.selected, .card.animating {
     box-shadow: 0px 4px 6px 2px rgba(0, 0, 0, 0.17);
     transform: scale(var(--hover-scale));
 }
@@ -190,6 +189,13 @@ body {
     opacity: 0.2 !important;
 }
 
+/* On sidebar: when a quad is hovered over it'll be highlighted */
+
+#found .found-quad:hover .card {
+    transform: scale(var(--hover-scale));
+    border-color: #ccc;
+
+}
 /* ........... Quad result animations ............ */
 
 /* A card can't be selected during one of these */
@@ -269,9 +275,9 @@ body {
 
 }
 .card.already-found .card-inner {
-    /*animation-name: gray-inverse;*/
+    animation-name: gray-inverse;
     animation-duration: 0.5s;
-    animation-timing-function: ease-in; /*cubic-bezier(.17,.67,.59,.93);*/
+    animation-timing-function: ease-in;
     animation-direction: alternate;
 }
 
@@ -279,7 +285,7 @@ body {
     from {
         filter: saturate(100%);
     }
-/*
+
     10% {
         filter: saturate(93%);
     }
@@ -304,10 +310,6 @@ body {
 
     to {
         filter: saturate(44%);
-    }
-    */
-    to {
-        filter: saturate(0%);
     }
 }
 
@@ -339,5 +341,23 @@ body {
 
     to {
         filter: saturate(290%);
+    }
+}
+
+/* -------- media queries ---------- */
+
+/* Small desktop displays */
+/* I'm going to assume that nobody in 2021 has a landscape display much smaller than this */
+/* No parenthesis in @media rules as far as I can tell :( */
+@media (min-aspect-ratio: 1/1) and (min-width: 850px) and (max-width: 1150px), (min-aspect-ratio: 1/1) and (max-height: 700px) {
+    #cards .card {
+        --scale: min(1.4vw, 2.2vh);
+    }
+
+    #found .card {
+        --scale: min(0.5vw, 0.77vh);
+    }
+    #found {
+        padding: 5px 10px 0 10px;
     }
 }
