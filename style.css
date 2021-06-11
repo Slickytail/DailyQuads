@@ -191,8 +191,8 @@ body {
 
 /* On sidebar: when a quad is hovered over it'll be highlighted */
 
-#found .found-quad:hover .card {
-    transform: scale(var(--hover-scale));
+#found .found-quad:hover {
+    transform: scale(1.035);
     border-color: #ccc;
 
 }
@@ -269,16 +269,14 @@ body {
 /* We use an animation instead of transition for this so that the inside part can oversaturate at inverse proportion */
 .card.already-found {
     animation-name: gray;
-    animation-duration: 0.3s;
+    animation-duration: 0.4s;
     animation-timing-function: cubic-bezier(.17,.67,.59,.93);
-    animation-direction: alternate;
 
 }
 .card.already-found .card-inner {
     animation-name: gray-inverse;
-    animation-duration: 0.5s;
-    animation-timing-function: ease-in;
-    animation-direction: alternate;
+    animation-duration: 0.4s;
+    animation-timing-function: ubic-bezier(.17,.67,.59,.93);
 }
 
 @keyframes gray {
@@ -341,6 +339,27 @@ body {
 
     to {
         filter: saturate(290%);
+    }
+}
+
+/* animation for the found quad on the side */
+.found-quad.highlight .card {
+    border-color: #d7c4b1 !important;
+}
+.found-quad.highlight {
+    animation-name: blink;
+    animation-duration: 0.14s;
+    animation-timing-function: ease-in-out;
+    animation-direction: alternate;
+    animation-iteration-count: 4;
+}
+
+@keyframes blink {
+    from {
+        transform: scale(1.0);
+    }
+    to {
+        transform: scale(1.035);
     }
 }
 

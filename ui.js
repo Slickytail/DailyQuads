@@ -16,6 +16,7 @@ function onCardClicked(cardNum, cardEl) {
         const cardEls = Array.from(document.getElementsByClassName("card selected"));
 
         const four = Array.from(CARDS_SELECTED);
+        const key = quadKey(four);
         // Immediately clear CARDS_SELECTED and remove .selected
         CARDS_SELECTED.clear();
         cardEls.forEach(e => {
@@ -35,23 +36,26 @@ function onCardClicked(cardNum, cardEl) {
         
         if ( four.reduce((a, b) => a^b) == 0 ) {
             // Correct quad
-            if ( !progress.includes(quadKey(four)) ) {
+            if ( !progress.includes(key) ) {
                 // New quad
                 // Animate
                 cardEls.forEach(x => x.classList.add("correct"));
                 // Save the found quad
-                progress.push(quadKey(four));
+                progress.push(key);
                 saveProgress();
                 // When everything else is done executing, add the found quad to the sidebar
                 // Maybe add a delay here for the animation?
                 setTimeout(() => {
                     createDomQuad(four, true);
-                }, 0);
+                }, 250);
             }
             else {
                 // Previously found quad
                 cardEls.forEach(x => x.classList.add("already-found"));
-                // Maybe highlight it on the side?
+                // Highlight it on the side
+                const prev = document.getElementById(key);
+                prev.classList.add("highlight");
+                prev.addEventListener("animationend", () => prev.classList.remove("highlight"), { once: true });
             }
 
         } else {
