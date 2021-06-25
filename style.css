@@ -17,7 +17,7 @@ body {
     /* Page layout defined here */
     grid-template:
         "title     title   " 4em
-        "subtitle  subtitle" 2em
+        "subtitle  congrats" 2em
         "cards     quads   " minmax(0, 1fr)
         "cards     buttons " 1em
       /  1fr       auto;
@@ -34,6 +34,17 @@ body {
     grid-area: subtitle;
     color: #666;
     margin: auto 20px;
+}
+
+#congrats {
+    grid-area: congrats;
+    color: #36993b;    
+    visibility: hidden;
+    text-align: center;
+    margin: 0;
+}
+.finished #congrats {
+    visibility: visible;
 }
 
 /* ----------- Card Layout Styles -------------- */
@@ -194,7 +205,7 @@ body {
 #buttons {
     grid-area: buttons;
 }
-#timer.finished {
+.finished #timer {
     color: #36993b;
 }
 

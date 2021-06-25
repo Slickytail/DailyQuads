@@ -49,6 +49,7 @@ function onCardClicked(cardNum, cardEl) {
                     finish_time = Date.now();
                     localStorage.setItem("finish_time", finish_time);
                     // Also maybe play a "finished" animation?
+                    setTimeout(() => document.body.classList.add("finished"), 500);
                 }
                 // Wait a little bit for the animation, and then put the found quad in the sidebar
                 setTimeout(() => {
@@ -187,7 +188,7 @@ function createListeners() {
         if (finish_time > 0) {
             // This is the last update.
             ms = finish_time - start_time;
-            timer.classList.add("finished");
+            // The green text will have already been added
         } else {
             // Figure out when we need to next update the timer.
             // We do this first to keep the timer accurate
@@ -224,7 +225,14 @@ function createListeners() {
         // Populate the sidebar
         // Don't animate these quads
         progress.forEach(q => createDomQuad(deQuadKey(q)));
+        // Set the finished class if we're done
+        if (progress.length == PUZZLE.n)
+            document.body.classList.add("finished");
     }
+
+    // Set a random congratulation message
+    const messages = ["Well done!", "Good job!", "Awesome!", "Nice job!", "You did it!", "All done!"];
+    document.getElementById("congrats").textContent = messages[Math.floor(Math.random() * messages.length)];
 
 }
 
