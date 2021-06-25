@@ -38,6 +38,9 @@ body {
 
 /* ----------- Card Layout Styles -------------- */
 #cards {
+    --n-cols: 4;
+    --n-rows: 2;
+
     grid-area: cards;
 
     display: grid;
@@ -47,6 +50,8 @@ body {
 
     justify-items: center;
     align-items: center;
+
+    contain: content;
 }
 /* Colors of card symbols */
 .color-0 { color: #c43b6f; }
@@ -67,6 +72,8 @@ body {
     position: relative;
 
     font-size: var(--scale, 1em);
+
+    contain: strict;
 }
 
 #cards .card {
@@ -132,11 +139,14 @@ body {
     padding: 10px 20px 0 20px;
     display: flex;
     flex-direction: column;
+    min-width: 15em;
+
+    contain: content;
 }
 
 #found-scroll {
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: stretch;
 
     overflow-y: auto;
@@ -145,11 +155,29 @@ body {
 .toptext {
     color: #666;
     margin: 8px;
+    overflow: hidden;
+    /* The other contains are probably not important.
+     * But this one might be, as the timer changes every second,
+     * so having a contain here makes sure that when it does, only the layout of this line of text is recomputed. */
+    contain: strict;
+    width: 15em;
+    height: 1.2em;
+    line-height: 1.2em;
 }
 .found-quad {
     display: flex;
     justify-content: space-evenly;
     margin: 5px;
+}
+
+.found-quad.dummy {
+    visibility: hidden;
+    height: 0;
+
+    /* Just to be safe... */
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
 }
 
 #found .card {
@@ -165,6 +193,9 @@ body {
 
 #buttons {
     grid-area: buttons;
+}
+#timer.finished {
+    color: #36993b;
 }
 
 /* ----------- Animations -------------- */

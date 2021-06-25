@@ -46,7 +46,7 @@ function onCardClicked(cardNum, cardEl) {
                 // When everything else is done executing, add the found quad to the sidebar
                 // Maybe add a delay here for the animation?
                 setTimeout(() => {
-                    createDomQuad(four, true);
+                    createDomQuad(four);
                 }, 250);
             }
             else {
@@ -74,6 +74,7 @@ function onCardClicked(cardNum, cardEl) {
 
 // Stores found quads in localstorage
 var progress = [];
+var finish_time = 0;
 function saveProgress() {
     localStorage.setItem("progress_quads", JSON.stringify(progress));
 }
@@ -131,7 +132,7 @@ function createDomCard(card) {
 }
 
 // Adds a found or recalled quad to the sidebar
-function createDomQuad(quad, animate) {
+function createDomQuad(quad, dummy) {
     let container = document.createElement("div");
     container.classList.add("found-quad");
     container.id = quadKey(quad);
@@ -139,8 +140,20 @@ function createDomQuad(quad, animate) {
     quad.forEach(q => container.appendChild(createDomCard(q)));
     document.getElementById("found-scroll").appendChild(container);
 
-    // Update the count
-    document.getElementById("nfound").textContent = progress.length;
+    if (dummy) 
+        container.classList.add("dummy");
+    else {
+        // Update the count
+        document.getElementById("nfound").textContent = progress.length;
+
+        // Check if all quads have been found
+        if (progress.length == PUZZLE.n) {
+            // How should we display this?
+            // For one, we can stop the timer.
+            finish_time = Date.now();
+            localStorage.setItem("finish_time", finish_time);
+        }
+    }
 }
 
 // Populates the page content
@@ -166,37 +179,55 @@ function createListeners() {
         card_container.appendChild(el)
     });
 
-    // Compute a grid layout for the card container
-    function onResize() {
+    // Set up the timer
+    const time_container = document.getElementById("timer");
+    var start_time = Date.now();
+    let updateTimer = () => {
 
-        let totalWidth = window.innerWidth;
-        let totalHeight = window.innerHeight;
+        let ms = Date.now() - start_time;
 
-        // The width of the "found" section is approximately 30vh
+        if (finish_time > 0) {
+            // This is the last update.
+            ms = finish_time - start_time;
+            timer.classList.add("finished");
+        } else {
+            // Figure out when we need to next update the timer.
+            // We do this first to keep the timer accurate
+            let ms_to_next_update = (Math.ceil(ms/1000) * 1000) - ms;
+            // Set a timeout for the next update
+            setTimeout(() => requestAnimationFrame(updateTimer), ms_to_next_update);
+        }
 
-        let cols = 4;
-        let rows = 2;
+        // Now update the actual timer text
+        // Get ISO time in hours, as the time elapsed can never be more than 24 hrs.
+        timer.textContent = (new Date(ms)).toISOString().substr(11, 8)
 
-        card_container.style.setProperty("--n-cols", cols);
-        card_container.style.setProperty("--n-rows", rows);
     }
-    window.addEventListener("resize", onResize);
-    onResize();
+    // We want the timer to only update when the browser is rendering.
+    // We also want it to update once per second!
+    requestAnimationFrame(updateTimer)
 
     // Populate found-quads display
+    // Create dummy quad so that the width of the quads display will be correct
+    createDomQuad([0, 0, 0, 0], true);
     // Check progress in localstorage
     if (!(localStorage.getItem("progress_day") >= day)) {
         // No progress or progress is outdated
         localStorage.setItem("progress_day", day);
+        localStorage.setItem("start_time", start_time);
         saveProgress();
     }
     else {
         // Load progress
         progress = JSON.parse(localStorage.getItem("progress_quads")) || [];
+        // Set the timer correctly
+        start_time = parseInt(localStorage.getItem("start_time") || Date.now()); // If localstorage got messed up, reset the start time
+        finish_time = parseInt(localStorage.getItem("finish_time") || 0);
         // Populate the sidebar
         // Don't animate these quads
-        progress.forEach(q => createDomQuad(deQuadKey(q), false));
+        progress.forEach(q => createDomQuad(deQuadKey(q)));
     }
+
 }
 
 // Check the day
