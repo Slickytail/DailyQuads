@@ -43,11 +43,19 @@ function onCardClicked(cardNum, cardEl) {
                 // Save the found quad
                 progress.push(key);
                 saveProgress();
-                // When everything else is done executing, add the found quad to the sidebar
-                // Maybe add a delay here for the animation?
+                // Check if all quads have been found
+                if (progress.length == PUZZLE.n) {
+                    // Stop the timer
+                    finish_time = Date.now();
+                    localStorage.setItem("finish_time", finish_time);
+                    // Also maybe play a "finished" animation?
+                }
+                // Wait a little bit for the animation, and then put the found quad in the sidebar
                 setTimeout(() => {
                     createDomQuad(four);
                 }, 250);
+
+
             }
             else {
                 // Previously found quad
@@ -131,8 +139,8 @@ function createDomCard(card) {
     return cardEl;
 }
 
-// Adds a found or recalled quad to the sidebar
-function createDomQuad(quad, dummy) {
+// Adds a found or recalled quad to the sidebar, and sets the number on the sidebar
+function createDomQuad(quad) {
     let container = document.createElement("div");
     container.classList.add("found-quad");
     container.id = quadKey(quad);
@@ -140,20 +148,10 @@ function createDomQuad(quad, dummy) {
     quad.forEach(q => container.appendChild(createDomCard(q)));
     document.getElementById("found-scroll").appendChild(container);
 
-    if (dummy) 
-        container.classList.add("dummy");
-    else {
-        // Update the count
-        document.getElementById("nfound").textContent = progress.length;
+    // Update the count
+    document.getElementById("nfound").textContent = progress.length;
 
-        // Check if all quads have been found
-        if (progress.length == PUZZLE.n) {
-            // How should we display this?
-            // For one, we can stop the timer.
-            finish_time = Date.now();
-            localStorage.setItem("finish_time", finish_time);
-        }
-    }
+    return container;
 }
 
 // Populates the page content
@@ -209,7 +207,7 @@ function createListeners() {
 
     // Populate found-quads display
     // Create dummy quad so that the width of the quads display will be correct
-    createDomQuad([0, 0, 0, 0], true);
+    createDomQuad([0, 0, 0, 0]).classList.add("dummy");
     // Check progress in localstorage
     if (!(localStorage.getItem("progress_day") >= day)) {
         // No progress or progress is outdated
